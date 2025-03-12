@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetic Retinopathy Detection</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .upload-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .result-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .drop-area {
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        .drop-area:hover {
+            background-color: #ecf0f1;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 20px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        progress {
+            width: 100%;
+            height: 20px;
+            border-radius: 10px;
+        }
+        .result-display {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            display: none;
+        }
+        .severity-gauge {
+            width: 100%;
+            height: 40px;
+            background-color: #ecf0f1;
+            border-radius: 20px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .severity-fill {
+            height: 100%;
+            background: linear-gradient(to right, #2ecc71, #f1c40f, #e74c3c);
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+        .severity-marker {
+            position: absolute;
+            top: -10px;
+            width: 10px;
+            height: 60px;
+            background-color: #2c3e50;
+            transform: translateX(-50%);
+        }
+        .info-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Diabetic Retinopathy Detection</h1>
+        <p>Upload retinal images for AI-powered diabetic retinopathy screening</p>
+    </header>
+
+    <div class="container">
+        <section class="upload-section">
+            <h2>Upload Retinal Image</h2>
+            <div class="drop-area" id="dropArea">
+                <p>Drag & drop your retinal image here or click to browse</p>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+            </div>
+            <img id="previewImage" class="preview-image" src="" alt="Preview">
+            <button id="analyzeBtn" disabled>Analyze Image</button>
+            
+            <div class="progress-container" id="progressContainer">
+                <p>Processing image...</p>
+                <progress id="progressBar" max="100" value="0"></progress>
+            </div>
+        </section>
+
+        <section class="result-section">
+            <h2>Analysis Results</h2>
+            <div class="result-display" id="resultDisplay">
+                <h3>Diabetic Retinopathy Classification</h3>
+                <div class="severity-gauge">
+                    <div class="severity-fill" id="severityFill"></div>
+                    <div class="severity-marker" id="severityMarker" style="left: 0%;"></div>
+                </div>
+                <div id="resultDetails"></div>
+            </div>
+            
+            <div class="info-section">
+                <h3>About Diabetic Retinopathy</h3>
+                <p>Diabetic retinopathy is a diabetes complication affecting the eyes. It's caused by damage to the blood vessels in the retina (the light-sensitive tissue at the back of the eye).</p>
+                
+                <h3>Severity Scale</h3>
+                <table>
+                    <tr>
+                        <th>Grade</th>
+                        <th>Classification</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>No DR</td>
+                        <td>No visible signs of diabetic retinopathy</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>Mild</td>
+                        <td>Microaneurysms only</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Moderate</td>
+                        <td>More than just microaneurysms but less than severe</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Severe</td>
+                        <td>Any of: >20 hemorrhages in each quadrant, venous beading, prominent IRMA</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Proliferative DR</td>
+                        <td>Neovascularization and/or vitreous/preretinal hemorrhage</td>
+                    </tr>
+                </table>
+                
+                <p><strong>Note:</strong> This tool is for educational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment.</p>
+            </div>
+        </section>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 Diabetic Retinopathy Detection Tool. This is a prototype demonstration.</p>
+        <p>All predictions are simulated for demonstration purposes.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('fileInput');
+            const previewImage = document.getElementById('previewImage');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const resultDisplay = document.getElementById('resultDisplay');
+            const resultDetails = document.getElementById('resultDetails');
+            const severityFill = document.getElementById('severityFill');
+            const severityMarker = document.getElementById('severityMarker');
+            
+            // Load TensorFlow.js (just for demonstration purposes)
+            const scriptTF = document.createElement('script');
+            scriptTF.src = 'https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.2.0/tf.min.js';
+            document.head.appendChild(scriptTF);
+            
+            // Handle file input changes
+            dropArea.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Setup drag and drop
+            dropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropArea.style.backgroundColor = '#ecf0f1';
+            });
+            
+            dropArea.addEventListener('dragleave', () => {
+                dropArea.style.backgroundColor = '';
+            });
+            
+            dropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropArea.style.backgroundColor = '';
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelect(e);
+                }
+            });
+            
+            // Handle the analyze button
+            analyzeBtn.addEventListener('click', analyzeImage);
+            
+            function handleFileSelect(e) {
+                const file = fileInput.files[0];
+                if (!file) return;
+                
+                // Check if it's an image
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                    analyzeBtn.disabled = false;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // Simulated model prediction
+            // In a real application, this would use TensorFlow.js to run inference
+            function analyzeImage() {
+                progressContainer.style.display = 'block';
+                resultDisplay.style.display = 'none';
+                analyzeBtn.disabled = true;
+                
+                // Simulate loading progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 100) progress = 100;
+                    progressBar.value = progress;
+                    
+                    if (progress === 100) {
+                        clearInterval(interval);
+                        setTimeout(displayResults, 500);
+                    }
+                }, 300);
+            }
+            
+            function displayResults() {
+                progressContainer.style.display = 'none';
+                resultDisplay.style.display = 'block';
+                analyzeBtn.disabled = false;
+                
+                // Simulate a prediction result
+                const randomValue = Math.random();
+                let gradeValue, classification, description, confidence, recommendationText;
+                
+                if (randomValue < 0.45) {
+                    gradeValue = 0;
+                    classification = "No Diabetic Retinopathy";
+                    description = "No visible signs of diabetic retinopathy detected.";
+                    confidence = 85 + Math.floor(Math.random() * 10);
+                    recommendationText = "Routine annual eye examination recommended.";
+                } else if (randomValue < 0.65) {
+                    gradeValue = 1;
+                    classification = "Mild Diabetic Retinopathy";
+                    description = "Microaneurysms are present.";
+                    confidence = 75 + Math.floor(Math.random() * 15);
+                    recommendationText = "Follow-up examination in 9-12 months recommended.";
+                } else if (randomValue < 0.80) {
+                    gradeValue = 2;
+                    classification = "Moderate Diabetic Retinopathy";
+                    description = "Microaneurysms plus other abnormalities (hard exudates, cotton wool spots, etc.).";
+                    confidence = 70 + Math.floor(Math.random() * 15);
+                    recommendationText = "Follow-up examination in 6 months recommended. Consider referral to ophthalmologist.";
+                } else if (randomValue < 0.95) {
+                    gradeValue = 3;
+                    classification = "Severe Diabetic Retinopathy";
+                    description = "Numerous hemorrhages, venous beading, or intraretinal microvascular abnormalities.";
+                    confidence = 75 + Math.floor(Math.random() * 15);
+                    recommendationText = "Prompt referral to ophthalmologist (within 4 weeks) recommended.";
+                } else {
+                    gradeValue = 4;
+                    classification = "Proliferative Diabetic Retinopathy";
+                    description = "Neovascularization or vitreous/preretinal hemorrhage present.";
+                    confidence = 80 + Math.floor(Math.random() * 10);
+                    recommendationText = "Immediate referral to ophthalmologist (within 1 week) recommended.";
+                }
+                
+                // Update the result details
+                const percentPosition = (gradeValue / 4) * 100;
+                severityFill.style.width = `${percentPosition}%`;
+                severityMarker.style.left = `${percentPosition}%`;
+                
+                resultDetails.innerHTML = `
+                    <p><strong>Classification:</strong> ${classification} (Grade ${gradeValue})</p>
+                    <p><strong>Confidence:</strong> ${confidence}%</p>
+                    <p><strong>Details:</strong> ${description}</p>
+                    <p><strong>Recommendation:</strong> ${recommendationText}</p>
+                    <p class="note"><em>Note: This is a simulated result for demonstration purposes only. 
+                    In a production system, a trained deep learning model would analyze the 
+                    retinal image and provide actual diagnostic predictions.</em></p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
