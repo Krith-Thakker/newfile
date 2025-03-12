@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetinaScan AI - Diabetic Retinopathy Detection</title>
+    <style>
+        :root {
+            --primary: #3a86ff;
+            --primary-dark: #2667cc;
+            --secondary: #ff006e;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #38b000;
+            --warning: #ffbe0b;
+            --danger: #ff5400;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background: url("/api/placeholder/1200/400") center/cover;
+            background-blend-mode: overlay;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary);
+            margin-left: 1rem;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        section {
+            padding: 5rem 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.2rem;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background-color: var(--secondary);
+            left: 25%;
+            bottom: -10px;
+        }
+        
+        .section-header p {
+            color: #6c757d;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(58, 134, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        .demo-section {
+            background-color: #eef2f7;
+        }
+        
+        .demo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        .demo-header h3 {
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .demo-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .demo-upload:hover {
+            border-color: var(--primary);
+        }
+        
+        .demo-upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .demo-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+        
+        .result-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+        }
+        
+        .result-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .result-details h4 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .severity-bar {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .severity-fill {
+            height: 100%;
+            border-radius: 5px;
+        }
+        
+        .severity-mild .severity-fill {
+            width: 20%;
+            background-color: var(--success);
+        }
+        
+        .severity-moderate .severity-fill {
+            width: 60%;
+            background-color: var(--warning);
+        }
+        
+        .severity-severe .severity-fill {
+            width: 90%;
+            background-color: var(--danger);
+        }
+        
+        .how-it-works {
+            background-color: white;
+        }
+        
+        .workflow {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .workflow::before {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 3px;
+            background-color: var(--primary);
+            top: 70px;
+            left: 10%;
+            z-index: 1;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 25%;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 15px rgba(58, 134, 255, 0.3);
+        }
+        
+        .step-details {
+            max-width: 200px;
+        }
+        
+        .step-details h4 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .accuracy-section {
+            background-color: #f5f7fa;
+        }
+        
+        .metrics {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        
+        .metric-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .metric-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+        
+        .about {
+            background-color: white;
+        }
+        
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+        
+        .about-image {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .about-text h3 {
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .about-text p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .testimonials {
+            background-color: #eef2f7;
+        }
+        
+        .testimonial-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .testimonial-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .testimonial-content {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .testimonial-content::before {
+            content: '"';
+            font-size: 4rem;
+            color: rgba(58, 134, 255, 0.1);
+            position: absolute;
+            top: -20px;
+            left: -15px;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            object-fit: cover;
+        }
+        
+        .author-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+        
+        .author-info p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .cta {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            text-align: center;
+        }
+        
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cta p {
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .cta .btn-secondary {
+            background-color: white;
+            color: var(--primary);
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 3rem 0 1rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 2px;
+            background-color: var(--primary);
+            left: 0;
+            bottom: -5px;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-column a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-column a:hover {
+            color: white;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: background-color 0.3s;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--primary);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .workflow {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .workflow::before {
+                width: 3px;
+                height: 80%;
+                top: 10%;
+                left: calc(50% - 1.5px);
+            }
+            
+            .step {
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+            
+            .demo-results {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <span class="logo-icon">👁️</span> RetinaScan AI
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="#how">How It Works</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact" class="btn btn-secondary">Contact Us</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Advanced AI for Diabetic Retinopathy Detection</h1>
+            <p>Our state-of-the-art deep learning model helps healthcare professionals detect and grade diabetic retinopathy with 95%+ accuracy, enabling early intervention and better patient outcomes.</p>
+            <div>
+                <a href="#demo" class="btn btn-primary">Try Demo</a>
+                <a href="#about" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Key Features</h2>
+                <p>Discover how our AI-powered solution transforms diabetic retinopathy screening</p>
+            </div>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>High Accuracy</h3>
+                    <p>Our model achieves 95%+ accuracy in detecting and grading diabetic retinopathy, matching expert ophthalmologists.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Real-time Analysis</h3>
+                    <p>Get instant results within seconds, significantly reducing screening time and improving workflow efficiency.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Detailed Reports</h3>
+                    <p>Receive comprehensive reports with severity grading, affected areas visualization, and treatment recommendations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>HIPAA Compliant</h3>
+                    <p>All data processing follows strict healthcare privacy standards with end-to-end encryption.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💻</div>
+                    <h3>EMR Integration</h3>
+                    <p>Seamlessly integrate with major electronic medical record systems for streamlined workflow.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile Compatibility</h3>
+                    <p>Use our solution on any device, making it perfect for telemedicine and remote screening programs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Interactive Demo</h2>
+                <p>Experience our AI in action by uploading a retinal image for instant analysis</p>
+            </div>
+            <div class="demo-container">
+                <div class="demo-header">
+                    <h3>Upload Retinal Image</h3>
+                    <p>Drag and drop your retinal image or click to browse files</p>
+                </div>
+                <div class="demo-upload">
+                    <div class="demo-upload-icon">📁</div>
+                    <p>Upload your retinal image (JPEG, PNG) or use one of our sample images</p>
+                    <button class="btn btn-primary" style="margin-top: 1rem;">Upload Image</button>
+                    <button class="btn btn-secondary" style="margin-top: 1rem;">Use Sample Image</button>
+                </div>
+                <div class="demo-results">
+                    <div class="result-card">
+                        <img src="/api/placeholder/400/200" alt="Original Retinal Image" class="result-image">
+                        <div class="result-details">
+                            <h4>Original Image</h4>
+                            <p>High-resolution fundus photograph of the right eye</p>
+                        </div>
+                    </div>
+                    <div class="result-card">
+                        <img src="/api/placeholder/400/200" alt="Analyzed Retinal Image" class="result-image">
+                        <div class="result-details">
+                            <h4>AI Analysis Results</h4>
+                            <p>Moderate NPDR (Non-Proliferative Diabetic Retinopathy)</p>
+                            <div class="severity-bar severity-moderate">
+                                <div class="severity-fill"></div>
+                            </div>
+                            <p>Confidence: 92.8%</p>
+                            <p>Detected abnormalities: Microaneurysms, Hard Exudates</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how" class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>How It Works</h2>
+                <p>Our sophisticated AI employs a multi-stage process to analyze retinal images</p>
+            </div>
+            <div class="workflow">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-details">
+                        <h4>Image Acquisition</h4>
+                        <p>Upload high-quality retinal images from standard fundus cameras</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-details">
+                        <h4>Preprocessing</h4>
+                        <p>Images are enhanced and normalized for optimal analysis</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-details">
+                        <h4>AI Analysis</h4>
+                        <p>Our deep learning model examines the image for signs of diabetic retinopathy</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-details">
+                        <h4>Results & Reports</h4>
+                        <p>Receive detailed analysis with severity grading and recommendations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Accuracy Section -->
+    <section class="accuracy-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Industry-Leading Accuracy</h2>
+                <p>Our AI model has been validated through extensive clinical trials</p>
+            </div>
+            <div class="metrics">
+                <div class="metric-card">
+                    <h3>Accuracy</h3>
+                    <div class="metric-value">95.7%</div>
+                    <p>Overall accuracy across all severity grades of diabetic retinopathy</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Sensitivity</h3>
+                    <div class="metric-value">96.2%</div>
+                    <p>Ability to correctly identify patients with diabetic retinopathy</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Specificity</h3>
+                    <div class="metric-value">94.1%</div>
+                    <p>Ability to correctly identify patients without diabetic retinopathy</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>About Our Technology</h2>
+                <p>Learn how our advanced AI model is transforming diabetic eye care</p>
+            </div>
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="/api/placeholder/500/400" alt="AI Technology Illustration">
+                </div>
+                <div class="about-text">
+                    <h3>Next-Generation Deep Learning</h3>
+                    <p>RetinaScan AI leverages a sophisticated ensemble of convolutional neural networks (CNNs) trained on over 500,000 annotated retinal images. Our model has been developed in collaboration with leading ophthalmologists and AI researchers.</p>
+                    <p>The system can detect and classify diabetic retinopathy into five severity grades: No DR, Mild NPDR, Moderate NPDR, Severe NPDR, and Proliferative DR. Additionally, it can identify specific lesions associated with diabetic retinopathy, including microaneurysms, hemorrhages, hard exudates, soft exudates, and neovascularization.</p>
+                    <p>Our technology has been validated in multiple clinical settings across diverse patient populations, ensuring reliable performance regardless of ethnicity, age, or camera type.</p>
+                    <a href="#" class="btn btn-primary">Read Technical Paper</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>What Medical Professionals Say</h2>
+                <p>Hear from ophthalmologists and healthcare providers using our technology</p>
+            </div>
+            <div class="testimonial-cards">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>RetinaScan AI has revolutionized our screening process. We've been able to increase our throughput by 300% while maintaining high diagnostic accuracy. It's particularly valuable in our rural clinics where specialist access is limited.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="/api/placeholder/50/50" alt="Dr. Sarah Johnson" class="author-avatar">
+                        <div class="author-info">
+                            <h4>Dr. Sarah Johnson</h4>
+                            <p>Chief of Ophthalmology, Metro Health System</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>The integration with our EMR system was seamless. The AI's ability to highlight specific lesions and provide quantitative measurements has improved our clinical decision-making and patient education significantly.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="/api/placeholder/50/50" alt="Dr. Michael Chen" class="author-avatar">
+                        <div class="author-info">
+                            <h4>Dr. Michael Chen</h4>
+                            <p>Retina Specialist, Vision Care Associates</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>As part of our community screening program, RetinaScan AI has helped us identify cases that require urgent referral, potentially saving the vision of dozens of patients who would have otherwise been missed.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="/api/placeholder/50/50" alt="Dr. Maya Patel" class="author-avatar">
+                        <div class="author-info">
+                            <h4>Dr. Maya Patel</h4>
+                            <p>Director, Public Health Initiatives</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Transform Your Diabetic Eye Care?</h2>
+            <p>Join leading healthcare institutions using RetinaScan AI to improve early detection and patient outcomes</p>
+            <div>
+                <a href="#" class="btn btn-primary">Request a Demo</a>
+                <a href="#" class="btn btn-secondary">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>RetinaScan AI</h3>
+                    <p>Advancing diabetic eye care through artificial intelligence and deep learning technology.</p>
+                    <div class="social-links">
+                        <a href="#">📱</a>
+                        <a href="#">💻</a>
+                        <a href="#">📧</a>
+                        <a href="#">🔗</a>
+                    </div>
+                </div>
+                <div class="footer-column
